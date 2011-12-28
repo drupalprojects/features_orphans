@@ -11,10 +11,11 @@
  */
 function features_orphans_menu() {
   $items = array();
-  $items['admin/structure/features/orphans'] = array(
+  $items['admin/build/features/orphans'] = array(
     'title' => 'Orphans',
     'description' => 'List all exportable components that are NOT included in a feature module.',
-    'page callback' => 'features_orphans_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('features_orphans_page_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer features'),
     'type' => MENU_LOCAL_TASK,
@@ -24,9 +25,9 @@ function features_orphans_menu() {
 }
 
 /**
- * Page Callback
+ * Page form Callback
  */
-function features_orphans_page() {
+function features_orphans_page_form(&$form_state) {
   module_load_include('export.inc', 'features');
 
   $build['orphans'] = array(
@@ -37,7 +38,7 @@ function features_orphans_page() {
   ksort($components);
   unset($components['dependencies']);
 // Add required JavaScript and Stylesheet.
-  drupal_add_library('system', 'drupal.vertical-tabs');
+// drupal_add_library('system', 'drupal.vertical-tabs');
 
   $options = array();
   foreach ($components as $component => $component_info) {
@@ -85,19 +86,23 @@ function features_orphans_page() {
         '#group' => 'orphans',
       );
       $build[$component]['items'] = array(
-        '#theme' => 'html_tag',
+        '#prefix' => '<pre>',
         '#value' => $items_output,
-        '#tag' => 'pre',
+        '#suffix' => '</pre>',
       );
-
     }
   }
 
-  return array(
-    '#markup' => theme('vertical_tabs', array(
-      'element' => array(
-        '#children' => render($build),
-      ),
-    )));
   return $build;
+}
+
+/**
+ * Implements hook_enable().
+ *
+ * To set the vertical tabs variable.
+ */
+function features_orphans_enable() {
+  $vertical_tabs_forms = variable_get('vertical_tabs_forms', array());
+  $vertical_tabs_forms['features_orphans_page_form'] = TRUE;
+  variable_set('vertical_tabs_forms', $vertical_tabs_forms);
 }

@@ -1,4 +1,5 @@
 name = "Features Orphans"
 description = "An administration tool that lists all Features-exportable components that do NOT belong to a feature module"
-core = 7.x
+core = 6.x
 package = "Features"
+dependencies[] = features
